@@ -1,0 +1,22 @@
+{
+  "name": "NodeJS",
+  "version": "1.0.0",
+  "description": "Start to lern Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon /index.js"
+  },
+  "repository": "git@github.com:Kh-Ol-An/node-js.git",
+  "author": "Khristenko Oleg",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.4",
+    "path": "^0.12.7"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "yargs": "^15.3.1"
+  }
+}
