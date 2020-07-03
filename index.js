@@ -4,8 +4,6 @@ const {
     removeContact,
     addContact,
 } = require("./contacts.js");
-
-global.rootPath = __dirname;
 const argv = require("yargs").argv;
 
 // TODO: рефакторить
