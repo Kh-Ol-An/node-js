@@ -1,8 +1,4 @@
 const { readFile, writeFile } = require("fs").promises;
-const { join } = require("path");
-
-const contactsPath = join(__dirname, "contacts.js");
-console.log('contactsPath :>> ', contactsPath);
 
 class User {
     constructor({ name, email, phone }, id) {
@@ -15,17 +11,13 @@ class User {
 
 const listContacts = async () => {
     const users = await readFile("db/contacts.json", "utf-8");
-    const result = JSON.parse(users)
-    console.log("listContacts :>> ");
-    console.table(result);
+    const result = JSON.parse(users);
     return result;
 };
 
-const getContactById = async (contactId) => {
+const getById = async (contactId) => {
     const contacts = await listContacts();
     const result = contacts.find((item) => item.id === contactId);
-    console.log("getContactById :>> ");
-    console.table(result);
     return result;
 };
 
@@ -33,19 +25,32 @@ const removeContact = async (contactId) => {
     const contacts = await listContacts();
     const result = contacts.filter((item) => item.id !== contactId);
     await writeFile("db/contacts.json", JSON.stringify(result));
-    console.log("removeContact :>> ");
-    console.table(result);
-    return result;
+    return !(result.length === contacts.length);
 };
 
-const addContact = async (name, email, phone) => {
+const addContact = async (user) => {
     const contacts = await listContacts();
     const newId = [...contacts].pop().id + 1;
-    const createdUser = new User({ name, email, phone }, newId);
+    const createdUser = new User(user, newId);
     contacts.push(createdUser);
     await writeFile("db/contacts.json", JSON.stringify(contacts));
-    console.log("addContact :>> ");
-    console.table(contacts);
+    return createdUser;
 };
 
-module.exports = { listContacts, getContactById, removeContact, addContact };
+const updateContact = async (id, data) => {
+    const usersData = await listContacts();
+    const result = usersData.map((item) => {
+        if (item.id === id) {
+            return { ...item, ...data };
+        }
+        return item;
+    });
+    if (result !== usersData) {
+        await writeFile("db/contacts.json", JSON.stringify(result));
+        return result.find((user) => user.id === id);
+    } else {
+        return false;
+    }
+};
+
+module.exports = { listContacts, getById, removeContact, addContact, updateContact };
