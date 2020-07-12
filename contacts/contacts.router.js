@@ -1,23 +1,17 @@
 const { Router } = require("express");
-const {
-    listContacts,
-    addContact,
-    getById,
-    updateContact,
-    removeContact,
-} = require("./contacts.model");
+const User = require("./contacts.model");
 
 const userRoter = Router();
 
 userRoter.get("/", async (req, res) => {
-    const users = await listContacts();
+    const users = await User.getUsers();
     res.json(users);
     res.end();
 });
 
 userRoter.get("/:contactId", async (req, res) => {
     const { contactId } = req.params;
-    const user = await getById(+contactId);
+    const user = await User.getUserById(contactId);
     user && res.json(user);
     if (user) {
         res.json(user);
@@ -29,10 +23,10 @@ userRoter.get("/:contactId", async (req, res) => {
 });
 
 userRoter.post("/", async (req, res) => {
-    const { name, email, phone } = req.body;
-    if (name && email && phone) {
+    const { name, email, phone, subscription, password } = req.body;
+    if (name && email && phone && subscription && password) {
         res.status(201);
-        const createdUser = await addContact(req.body);
+        const createdUser = await User.createUserModel(req.body);
         res.json(createdUser);
     } else {
         res.status(404);
@@ -43,7 +37,7 @@ userRoter.post("/", async (req, res) => {
 
 userRoter.delete("/:contactId", async (req, res) => {
     const { contactId } = req.params;
-    const result = await removeContact(+contactId);
+    const result = await User.deleteUserById(contactId);
     if (result) {
         res.json({ message: "contact deleted" });
     } else {
@@ -55,9 +49,9 @@ userRoter.delete("/:contactId", async (req, res) => {
 
 userRoter.patch("/:contactId", async (req, res) => {
     const { contactId } = req.params;
-    const { name, email, phone } = req.body;
-    if (name || email || phone) {
-        const updatedUser = await updateContact(+contactId, req.body);
+    const { name, email, phone, subscription, password } = req.body;
+    if (name || email || phone || subscription || password) {
+        const updatedUser = await User.updateUser(contactId, req.body);
         if (updatedUser) {
             res.json(updatedUser);
         } else {
