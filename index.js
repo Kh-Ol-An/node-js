@@ -4,7 +4,8 @@ const express = require("express");
 const app = express();
 var morgan = require("morgan");
 const cors = require("cors");
-const { userRoter } = require("./contacts/contacts.router");
+const { userRouter } = require("./contacts/contacts.router");
+const { authRouter } = require("./auth/auth.router");
 
 const crateServer = async () => {
     try {
@@ -22,7 +23,8 @@ const crateServer = async () => {
 
         app.use(express.json());
 
-        app.use("/api/contacts", userRoter);
+        app.use("/api/contacts", userRouter);
+        app.use("/auth", authRouter);
 
         app.listen(process.env.PORT, () =>
             console.log("Server listening on port: " + process.env.PORT)
