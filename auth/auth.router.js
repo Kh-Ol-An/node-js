@@ -2,10 +2,8 @@ const { Router } = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../contacts/contacts.model");
-
-// const {
-//     validateCreateUserMiddleware,
-// } = require("../contacts/contacts.validator");
+const { authMiddelware } = require("../middlewares/auth.middleware");
+const { readFile, writeFile } = require("fs").promises;
 
 const { validateLoginMiddleware } = require("./auth.validator");
 
@@ -63,6 +61,22 @@ authRouter.post("/login", validateLoginMiddleware, async (req, res) => {
             },
         };
         res.json(resultCreate);
+    } catch (e) {
+        res.status(500).send(e);
+    } finally {
+        res.end();
+    }
+});
+
+authRouter.post("/logout", authMiddelware, async (req, res) => {
+    try {
+        const token = req.headers.authorization.replace("Bearer ", "");
+        const tokens = JSON.parse(
+            await readFile("db/tokenBlackList.json", "utf-8")
+        );
+        tokens.push(token);
+        await writeFile("db/tokenBlackList.json", JSON.stringify(tokens));
+        res.status(204);
     } catch (e) {
         res.status(500).send(e);
     } finally {

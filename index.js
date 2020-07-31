@@ -23,7 +23,7 @@ const crateServer = async () => {
 
         app.use(express.json());
 
-        app.use("/api/contacts", userRouter);
+        app.use("/", userRouter);
         app.use("/auth", authRouter);
 
         app.listen(process.env.PORT, () =>
