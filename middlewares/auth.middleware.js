@@ -5,7 +5,6 @@ const { readFile } = require("fs").promises;
 const authMiddelware = async (req, res, next) => {
     try {
         const token = req.headers.authorization;
-        console.log('token :>> ', token);
         if (!token) {
             res.status(401).json({ message: "Not authorized" });
             return;
