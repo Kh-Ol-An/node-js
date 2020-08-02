@@ -5,8 +5,13 @@ const { authMiddelware } = require("../middlewares/auth.middleware");
 const userRouter = Router();
 
 userRouter.get("/api/contacts", authMiddelware, async (req, res) => {
-    const users = await User.getUsers();
-    const result = users.map(el => ({
+    const { page, limit } = req.query;
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    }
+    const users = await User.getUsers(options);
+    const result = users.docs.map(el => ({
         subscription: el.subscription,
         _id: el._id,
         name: el.name,
@@ -104,6 +109,27 @@ userRouter.get("/users/current", authMiddelware, async (req, res) => {
     const { email, subscription } = req.user;
     const result = { email, subscription };
     res.json(result);
+    res.end();
+});
+
+userRouter.patch("/users/:contactId", authMiddelware, async (req, res) => {
+    const { contactId } = req.params;
+    const { subscription } = req.body;
+    if (subscription) {
+        const updatedUser = await User.updateUser(contactId, req.body);
+        if (updatedUser) {
+            const result = ({
+                subscription: updatedUser.subscription,
+                _id: updatedUser._id,
+                name: updatedUser.name
+            })
+            res.json(result);
+        } else {
+            res.status(404).json({ message: "Not found" });
+        }
+    } else {
+        res.status(400).json({ message: "missing fields" });
+    }
     res.end();
 });
 
