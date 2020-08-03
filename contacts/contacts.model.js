@@ -1,27 +1,36 @@
 const mongoose = require("mongoose");
+const mongoosePaginate = require('mongoose-paginate-v2');
 
-const userSchema = new mongoose.Schema(
-    {
-        name: String,
-        email: String,
-        phone: String,
-        subscription: String,
-        password: String,
+const userSchema = new mongoose.Schema({
+    name: String,
+    email: String,
+    phone: String,
+    subscription: {
+        type: String,
+        enum: ["free", "pro", "premium"],
+        default: "free",
     },
-    { versionKey: false }
-);
+    password: String,
+    token: String,
+});
+
+userSchema.plugin(mongoosePaginate);
 
 class User {
     constructor() {
         this.user = mongoose.model("contacts", userSchema);
     }
 
-    getUsers = async () => {
-        return await this.user.find();
+    getUsers = async (options) => {
+        return await this.user.paginate({}, options);
     };
 
     getUserById = async (id) => {
         return await this.user.findById(id);
+    };
+
+    getUserWithQuery = async (query = {}) => {
+        return await this.user.find(query);
     };
 
     createUserModel = async (data) => {
