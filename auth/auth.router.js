@@ -3,7 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../contacts/contacts.model");
 const { authMiddelware } = require("../middlewares/auth.middleware");
-const { readFile, writeFile } = require("fs").promises;
+const { readFile, writeFile, rename } = require("fs").promises;
+const Avatar = require("avatar-builder");
 
 const { validateLoginMiddleware } = require("./auth.validator");
 
@@ -17,16 +18,36 @@ authRouter.post("/register", validateLoginMiddleware, async (req, res) => {
             res.status(409).json({ message: "Email in use" });
         } else {
             const hashPassword = await bcrypt.hash(password, 10);
-            const { subscription, email } = await User.createUserModel({
+            const { subscription, email, _id } = await User.createUserModel({
                 ...req.body,
                 password: hashPassword,
                 role: "USER",
             });
+            await User.updateUser(_id, {
+                avatarName: `${_id}.png`,
+                avatarURL: `http://locahost:3000/images/${_id}.png`,
+            });
             const resultCreate = { user: { email, subscription } };
+
+            const avatar = Avatar.builder(
+                Avatar.Image.margin(
+                    Avatar.Image.circleMask(Avatar.Image.identicon())
+                ),
+                128,
+                128,
+                { cache: Avatar.Cache.lru() }
+            );
+            await avatar
+                .create("gabriel")
+                .then(
+                    async (buffer) => await writeFile("tmp/avatar.png", buffer)
+                );
+
+            await rename("tmp/avatar.png", `public/images/${_id}.png`);
             res.status(201).json(resultCreate);
         }
-    } catch (e) {
-        res.status(500).send(e);
+    } catch (err) {
+        res.status(500).send(err);
     } finally {
         res.end();
     }
@@ -61,8 +82,8 @@ authRouter.post("/login", validateLoginMiddleware, async (req, res) => {
             },
         };
         res.json(resultCreate);
-    } catch (e) {
-        res.status(500).send(e);
+    } catch (err) {
+        res.status(500).send(err);
     } finally {
         res.end();
     }
@@ -77,8 +98,8 @@ authRouter.post("/logout", authMiddelware, async (req, res) => {
         tokens.push(token);
         await writeFile("db/tokenBlackList.json", JSON.stringify(tokens));
         res.status(204);
-    } catch (e) {
-        res.status(500).send(e);
+    } catch (err) {
+        res.status(500).send(err);
     } finally {
         res.end();
     }

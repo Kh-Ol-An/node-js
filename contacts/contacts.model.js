@@ -1,10 +1,18 @@
 const mongoose = require("mongoose");
-const mongoosePaginate = require('mongoose-paginate-v2');
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     phone: String,
+    avatarName: {
+        type: String,
+        default: "avatar.png",
+    },
+    avatarURL: {
+        type: String,
+        default: "../tmp/avatar.png",
+    },
     subscription: {
         type: String,
         enum: ["free", "pro", "premium"],
